@@ -1,0 +1,166 @@
+1)
+List all PVs sorted by the capacity and save the full kubectl output to /opt/my_volumes.txt
+
+2)
+
+Ensure a single instance of Pod nginx is running on each node of the kubernetes cluster where nginx also represents the image name which has to be used.
+Do not override any taints currently in place. Use Daemon set to complete this task and use kplabs-daemonset as Daemonset's name.
+
+3)
+
+Create a deployment as follows
+•	Name:nginx-app
+•	Using container nginx with version 1.11.9-alpine
+•	The deployment should contain 3 replicas
+•	Next, deploy the app with new version 1.12.0-alpine by performing a rolling update and record that update.
+•	Finally, rollback that update to the previous version 1.11.9-alpine
+
+4)
+
+Create and configure the service front-end-service so it's accessible through NodePort and routes to the existing pod under the front-end.
+
+
+5)
+Scale the nginx-app deployment to 6 pods. 
+
+6)
+List all the nodes which do not contain any non-scheduling and not-reachable node. Write the output to /opt/nodes.txt
+
+
+7)
+
+From the pods with lable highcpuload=cpu, identify the one which is taking the most CPU. Write the name of the pod to /opt/cpu.txt
+
+
+8)
+Create a deployment as follows
+•	Name: nginx-resolver
+•	Exposed via a service: nginx-resolver
+•	Ensure that the service & pod are accessible via their respective DNS records
+•	The container(s) within any pod(s) running as a part of this deployment should use the nginx image
+Use the utility nslookup to look up the DNS records of the service & pod and write the output to /opt/service.dns and /opt/pod.dns respectively
+
+
+9)
+Take a backup of the etcd cluster and save it to /tmp/etcd-backup.db
+endpoint,key,cacert and cert file location will be given in exam.
+
+10)
+A kubernetes worker node is in state NotReady Investigate why this is the case, and perform any appropriates steps to bring the node to a Ready state
+ssh to given node and check kubelet service -- it was stopped ..need to restart and enable kubelet service.
+
+
+
+11)
+place a pod on node with lable name=w8ks-node01.
+Create a pod with kubelet manage service The name should be app and it should be launched from the jenkins image.
+you can use manifest file location as /etc/kubernetes/manifests given in the exam.
+
+
+
+12)
+you need to setup k8s cluster of 1 master and 1 worker node using kubeadm tool, kubeadm.config file will be given using this file you need to initialized master node
+CNI link will be there in exam- in my case it was calico
+Kubeadm cofig file and parameter with need to pass are given in the exam.
+
+example:  kubeadm init --config=/etc/cka-exam.config --ignore-preflight-errors=all
+
+
+13)
+Give a partially- functioning Kuberenetes cluster, identify symptoms of failure on the cluster. in my case kubernetes api server was not running need to find out issue and fix it  
+issue- no kubectl command working, staticPodPath: BROKEN set
+- just login to given master node in exam and modify staticPodPath: /etc/kubernetes/manifests in /var/lib/kubelet/config  and do systemctl daemon-reload and systemctl restart kubelet.
+
+
+
+14)
+Create a persistent volume with name app-config of capacity 2Gi and access mode ReadManyOnly. The type of volume is hostPath and its location is /opt/pvsort.txt
+
+
+15)
+Init Container to create a file named “sharedfile.txt” under the “work” directory on already given file yaml file the application container should check if
+the file exists and sleep for a while. If the file does not exist the application container should exit.
+
+https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-initialization/
+
+
+
+16)
+Set the first node within your cluster to be unavailable and re-schedule all the pods running on it.
+
+
+
+17)
+Create a pod as following details:
+•	Name:non-persistent-redis
+•	Container image: redis
+•	Name-volume with name: cache-control
+•	Mount path: /data/redis
+•	It should launch in the pre-pod namespace and the volumes must not be persistent.
+
+
+
+18)
+Create a Kubernetes Secret as follows:
+Name: super-secret
+Data of the secret:
+  credential=alice  
+Create a Pod named pod-secrets-via-file using the nginx image which mounts a secret named super-secret at /secrets
+Create a second Pod named pod-secrets-via-env using the nginx image, which exports credential as CONFIDENTIAL.
+
+https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-files-from-a-pod
+https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+
+
+19)
+
+Create a pod named kucc4 with a single container for each of the following images running inside (there may be between 1 and 4 images specified):
+ nginx + redis + memcached
+
+
+20) 
+Create a deployment spec file that will:
+
+•	Launch 7 replicas of the redis image with the label:app_env_stage=dev
+•	Deployment name: kua100201
+•	Save a copy of this spec file to /opt/KUAL00201/deploy_spec.yaml
+•	When you are done, clean up (delete) any new k8s API objects that you produced during this task
+
+
+21)
+
+Schedule a Pod as follows:
+•	Name: kplabs-selector
+•	Image:nginx
+•	Launch pod on the node which has a disktype of ssd.
+•	Make sure the Pod is in ready state.
+
+https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+
+
+22)
+
+Create a file /opt/KUCC00302/kucc00302.txt that lists all pods in the front-end-service.
+
+
+23)
+
+Monitor the logs from given pod name foobar in exam. Extract log lines which have the have keywork "Found error". Write them to /opt/kplabs-foobar
+
+
+24)
+Create a pod 
+  Name: Nginx
+  image: nginx
+  namespace: my-website
+
+
+
+
+
+
+
+
+
+
+
