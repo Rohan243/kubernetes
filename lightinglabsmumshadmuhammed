@@ -1,0 +1,74 @@
+source <(kubectl completion bash) # setup autocomplete in bash into the current shell, bash-completion package should be installed first.
+echo "source <(kubectl completion bash)" >> ~/.bashrc # add autocomplet
+
+alias k=kubectl
+complete -F __start_kubectl k
+
+# replace x in 1.17.x-00 with the latest patch version
+apt-mark unhold kubeadm && \
+apt-get update && apt-get install -y kubeadm=1.18.0-00 && \
+apt-mark hold kubeadm
+
+# since apt-get version 1.1 you can also use the following method
+apt-get update && \
+apt-get install -y --allow-change-held-packages kubeadm=1.18.0-00
+
+kubectl drain master --ignore-daemonsets
+
+sudo kubeadm upgrade plan
+
+sudo kubeadm upgrade apply v1.17.0
+
+
+Ans 
+
+aster $ cat answer2.md
+kubectl -n admin2406 get deployment -o custom-columns=DEPLOYMENT:.metadata.name,CONTAINER_IMAGE:.spec.template.spec.containers[].image,READY_REPLICAS:.status.readyReplicas,NAMESPACE:.metadata.namespace --sort-by=.metadata.name > /opt/admin2406_data
+
+master $ cat answer5.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+  name: mysql-alpha-pvc
+  namespace: alpha
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: slow
+
+aster $ cat answer6.md
+export ETCDCTL_API=3
+etcdctl snapshot save --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt--key=/etc/kubernetes/pki/etcd/server.key --endpoints=127.0.0.1:2379 /opt/etcd-backup.db
+
+
+
+master $ cat answer7.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: secret-1401
+  name: secret-1401
+  namespace: admin1401
+spec:
+  volumes:
+  - name: secret-volume
+    secret:
+      secretName: dotfile-secret
+  containers:
+  - command:
+    - sleep
+    args:
+    - "4800"
+    image: busybox
+    name: secret-admin
+    volumeMounts:
+    - name: secret-volume
+      readOnly: true
+      mountPath: "/etc/secret-volume"
+
