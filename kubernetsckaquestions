@@ -1,3 +1,5 @@
+CKA exam Questions Answers
+
 kubernetes certified Administrator - CKA Questions answers
 
 Ans 1 kubectl get pv --sort-by=.spec.capacity.storage >> /opt/my_volumes.txt
@@ -47,16 +49,17 @@ kubectl expose pod front-end --name front-end-service --type NodePort --port 80
 Ans 5 :
 kubectl scale deployment.v1.apps/nginx-app --replicas=6
 
-Ans 6 :
+Ans 6 :  IMPORTANT need to check this 
 
-kubectl get nodes -o jsonpath=’{.items[].spec.taints[?(@.effect==“NoSchedule”)].effect}{"\t"}{.items[].metadata.name}’ | cut -f 2,3
-
+kubectl get nodes -o=custom-columns=Name:.metadata.name,Taints:.spec.taints[*].effect| grep -v NoSchedule | grep -v Taints |awk '{print $1}' | wc -l
 or
 
-kubectl get nodes -o jsonpath=’{range .items[]}{.metadata.name}{"\t"}{.spec.taints[].effect}{"\n"}{end}’
+kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.taints[*].effect}{"\n"}{end}' | grep -v NoSchedule | wc -l > /opt/nodes.txt
 
 
-Ans 7 kubectl top pods -l highcpuload=cpu --sort-by=CPU >> /opt/cpu.txt
+Ans 7 Need to check this 
+
+ kubectl top pods -l highcpuload=cpu --sort-by=cpu|head -2| grep -v Name | awk {'print $1'}>> /opt/cpu.txt
 
 Ans 8 
 kubectl expose pod nginx-resolver --port 80 
@@ -77,6 +80,22 @@ Ans 11 :
 Static pod question : ssh node01 and than place pod build from this under /etc/kubernetes/manifests
 
 kubectl run app --image jenkins -l name=w8ks-node01
+
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    name: w8ks-node01
+  name: app
+spec:
+  containers:
+  - image: jenkins
+    name: app
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
 
 
 Ans 12 kubernetes kubeadm cluster setup network is already set i.e Calico in person case
@@ -290,5 +309,3 @@ kubectl run Nginx --image nginx -o yaml --dry-run=client >>nginx.yaml
 > add inside the pod metadata secton namespace: my-website
 
 kubectl create -f nginx.yaml
-
-
