@@ -167,6 +167,7 @@ metadata:
   labels:
     run: non-persistent-redis
   name: non-persistent-redis
+  namespace: pre-prod
 spec:
   volumes:
   - name: cache-control
