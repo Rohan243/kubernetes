@@ -1,0 +1,292 @@
+kubernetes certified Administrator - CKA Questions answers
+
+Ans 1 kubectl get pv --sort-by=.spec.capacity.storage >> /opt/my_volumes.txt
+
+Ans 2 
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: kplabs-daemonsets
+  name: kplabs-daemonsets
+spec:
+  selector:
+    matchLabels:
+      name: kplabs-daemonsets
+  template:
+    metadata:
+      labels:
+        name: kplabs-daemonsets
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+
+ Ans 3 : 
+kubectl create deployment nginx-app --namespace production --image nginx:1.11.9-alpine -o yaml --dry-run=client >> deployment.yaml
+replicas:3
+namespace: production
+
+kubectl --record deployment.apps/nginx-app --namespace production set image deployment.v1.apps/nginx-app nginx=nginx:1.12.0-alpine
+
+Rollout to previous version
+
+kubectl rollout undo deployment.v1.apps/nginx-app
+
+kubectl rollout status -w deployment nginx-app
+
+kubectl rollout history deployment/nginx-app
+
+kubectl get deployment nginx-app  -- check the status of rollback
+
+Ans 4 : 
+
+kubectl expose pod front-end --name front-end-service --type NodePort --port 80
+
+
+Ans 5 :
+kubectl scale deployment.v1.apps/nginx-app --replicas=6
+
+Ans 6 :  IMPORTANT need to check this 
+
+kubectl get nodes -o=custom-columns=Name:.metadata.name,Taints:.spec.taints[*].effect| grep -v NoSchedule | grep -v Taints |awk '{print $1}' | wc -l
+
+
+Ans 7 Need to check this 
+
+ kubectl top pods -l highcpuload=cpu --sort-by=cpu | grep -v Name | awk {'print $1'}>> /opt/cpu.txt
+
+Ans 8 
+
+kubectl expose pod nginx-resolver --port 80 
+
+kubectl run test-lookup --image nginx --rm -it - nslookup nginx-resolver.default.svc >> /root/nginx.svc
+
+
+kubectl run test-lookup --image nginx --rm -it -- nslookup 10-32-5-3.default.pod >> /root/nginx.pod
+
+
+And 9 backup of etcd known
+
+ETCDCTL_API=3 etcdctl --endpoints [127.0.0.1]:2379 --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key --cacert= /etc/kubernetes/pki/etcd/ca.crt snapshot save /tmp/etcd-backup.db
+
+Ans 10 troubeshooting question relate worker node failure notready state ssh to worker node and check kubelet service status it was stopped and restart and enable kubelet service
+systemctl status kubelet
+systemctl daemon-reload
+systemctl start kubelet
+
+Ans 11 :  
+Static pod question : ssh node01 and than place pod build from this under /etc/kubernetes/manifests
+
+kubectl run app --image jenkins -l name=w8ks-node01
+
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    name: w8ks-node01
+  name: app
+spec:
+  containers:
+  - image: jenkins
+    name: app
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+
+Ans 12 kubernetes kubeadm cluster setup network is already set i.e Calico in person case
+
+kubeadm init --config=/etc/cka-exam.config --ignore-preflight-errors=all
+
+Ans 13 
+cluster failure question :
+
+Case 1 : kubernetes api server not running need to find the issue and fix it 
+issue - no kubectl command working , StaticPodPath: Broken set
+-Just login to given master node in exam and modify StaticPodPath:/etc/kubernetes/manifests in /var/lib/kubelet/config and do systemctl daemon-reload and systemctl restart kubelet
+
+
+Ans 14  Create a PV 
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: app-config
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadManyOnly
+  hostPath:
+    path: "/opt/pvsort.txt"
+
+Ans 15:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: init-container-test
+spec:
+  containers:
+  - name: application-container
+    image: alpine
+    command: ['sh','-c','if[-f /work/sharedfile.txt]; then sleep 99999; else exit;fi']
+    volumeMounts:
+    - name: workdir-volume
+      mountPath: /work
+  # These containers are run during pod initialization
+  initContainers:
+  - name: init-container
+    image: busybox
+    command:['sh','-c','mkdir /work; touch /work/sharedfile.txt']
+    volumeMounts:
+    - name: workdir-volume
+      mountPath: /work
+  volumes:
+  - name: workdir-volume
+    emptyDir: {}
+
+Ans 16:
+
+kubectl get nodes
+
+kubectl get nodes -l name=ek8s-node-1
+kubectl drain wk8s-node-1 --ignore-daemonsets=true --delete-local-data=true --force=true
+
+Ans 17 :
+
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: non-persistent-redis
+  name: non-persistent-redis
+spec:
+  volumes:
+  - name: cache-control
+    emptyDir: {}
+  containers:
+  - image: redis
+    imagePullPolicy: IfNotPresent
+    name: non-persistent-redis
+    resources: {}
+    volumeMounts:
+    - mountPath: /data/redis
+      name: cache-control
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+
+
+Ans 18:
+kubectl create secret generic super-secret --from-literal=credential=alice
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-secrets-via-file
+spec:
+  containers:
+  - name: pod-secrets-via-file
+    image: nginx
+    volumeMounts:
+    - name: secret-volume
+      mountPath: "/secrets"
+      readOnly: true
+  volumes:
+  - name: secret-volume
+    secret:
+      secretName: super-secret
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-secrets-via-env
+spec:
+  containers:
+  - name: pod-secrets-via-env
+    image: nginx
+    env:
+      - name: CONFIDENTIAL
+        valueFrom:
+          secretKeyRef:
+            name: super-secret
+            key: credential
+
+Ans 19: 
+
+cat multi.yaml
+
+apiVersion:v1
+kind: Pod
+metadata:
+  labels:
+   run:kucci4
+  name: kucc4
+spec:
+ containers:
+ - image: nginx
+   name: nginx
+ - image: redis
+   name: redis
+ - image: memcached
+   name: memcached
+ - image: consul
+   name: consul
+
+
+ 
+
+Ans 20:
+
+kubectl create deployment kua100201 --image redis -l app_env_stage=dev -o yaml --dry-run=client >> /opt/KUAL00201/deploy_spec.yaml
+
+edit this yaml to 7 replicas
+
+kubectl delete deployment kua100201
+
+Ans 21 
+kubectl run kplabs-selector --image nginx
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kplabs-selector
+spec:
+  containers:
+  - name: kplabs-selector
+    image: nginx
+    imagePullPolicy: IfNotPresent
+  nodeSelector:
+    disktype: ssd
+
+Ans 22
+
+kubectl get svc --show-labels -n production
+Step 2 : get labels from there for me its environment=production tier=frontend
+
+kubectl get pods -n production --labels environment=production,tier=frontend | grep -v NAME| awk '{print $1}' > /opt/KUCC00302/kucc00302.txt
+
+Ans 23 
+
+kubectl logs foobar | grep -i "Found error" >> /opt/kplabs-foobar
+kubectl logs foobar | grep -i "unable-to-access-website" > /opt/KULM00201/foobar
+
+
+Ans 24 
+
+kubectl run Nginx --image nginx -o yaml --dry-run=client >>nginx.yaml
+> kubectl edit pod Nginx
+> add inside the pod metadata secton namespace: my-website
+
+kubectl create -f nginx.yaml
+
+
